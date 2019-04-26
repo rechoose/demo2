@@ -1,0 +1,78 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: my_first
+    #多数据源配置
+  datasource:
+    mysql1:
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://192.168.132.101:3306/gongwei
+      username: root
+      password: root
+  swagger:
+    base-package: cn.gw.demo2.controller
+    api-info:
+      title: my_first
+      description: my_first 基于spring boot
+      contact: 龚伟
+      version: 1.0.1
+      url: www.baidu.com
+      email: gongwei@0318@163.com
+  redis:
+    host: 192.168.132.101
+    port: 6379
+    #password: 123456
+    timeOut: 10000
+    pool:
+      max-wait: 100
+      max-idle: 10
+      min-idle: 5
+      max-active: 50
+  cloud:
+    stream:
+      bindings:
+        event_one_producer: #消息生产,通道名称
+          destination: event_one #交换机名称
+          contentType: application/json
+          producer:
+            header-mode: raw
+        event_one_consumer: #消息消费,通道名称
+          destination: event_one #交换机名称
+          contentType: application/json
+          group: p00000 #被消费队列名称
+          consumer:
+            header-mode: raw
+            concurrency: 10 #并发
+      binders:
+        rabbit:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: ${spring.rabbitmq.host}
+                port: ${spring.rabbitmq.port}
+                username: ${spring.rabbitmq.username}
+                password: ${spring.rabbitmq.password}
+      default-binder: rabbit
+
+  rabbitmq:
+    host: 192.168.132.101
+    port: 5672
+    username: admin
+    password: admin
+  data:
+    mongodb:
+      host: 192.168.132.101
+      port: 27017
+      database: myfirst
+
+
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+
+
+
+

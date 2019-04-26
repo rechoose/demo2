@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.gw.demo2.dao.mysql1.StudentMapper">
+
+    <!-- 查询指定时间范围内舆情数据-->
+    <select id = "findOne" resultType="cn.gw.demo2.pojo.StudentDto">
+		select t.* from student t
+		<where>
+            <if test="id != null and id !='' ">
+                t.id = #{id}
+            </if>
+        </where>
+	</select>
+
+    <insert id="insert" parameterType="cn.gw.demo2.pojo.StudentDto">
+        insert into student (id,name,sex) values(#{studentDto.id},#{studentDto.name},#{studentDto.sex})
+    </insert>
+
+    <select id="listByKeyWord" parameterType="map" resultType="cn.gw.demo2.pojo.StudentDto">
+        select t.* from student t
+        <where>
+            <if test="name != null and name !='' ">
+                t.name like #{name}
+            </if>
+        </where>
+    </select>
+
+    <select id="listByIds" parameterType="map" resultType="cn.gw.demo2.pojo.StudentDto">
+        select t.* from student t
+        <where>
+            1=1
+            <if test="stationIds != null and stationIds.size > 0">
+                and t.id in
+                <foreach collection="stationIds" item="item" index="index" open="("  close=")">
+                    <if test="index != 0">
+                        <choose>
+                            <when test="index % 1000 == 999">) OR t.id in (</when>
+                            <otherwise>,</otherwise>
+                        </choose>
+                    </if>
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+
+    </select>
+</mapper>

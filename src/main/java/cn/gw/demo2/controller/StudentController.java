@@ -6,16 +6,12 @@ import cn.gw.demo2.pojo.page.PageReq;
 import cn.gw.demo2.service.StudentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
 import java.util.Random;
 import java.util.UUID;
 
@@ -56,7 +52,7 @@ public class StudentController {
 
     @PostMapping("/list")
     @ApiOperation("获取列表,排序,分页")
-    public Page list(@RequestParam(required = false) String keyWord,@RequestBody PageReq pageRequest) {
+    public Page list(@RequestParam(required = false) String keyWord, @RequestBody PageReq pageRequest) {
         try {
             return studentService.list(keyWord, pageRequest);
         } catch (Exception e) {

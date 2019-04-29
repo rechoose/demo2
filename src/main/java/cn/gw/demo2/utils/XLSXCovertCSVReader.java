@@ -431,11 +431,15 @@ public class XLSXCovertCSVReader {
         return list;
     }
 
+    public static <T> void writeTo2007Excel(List<T> param, Class<T> clazz, String filePath) throws Exception {
+        writeTo2007Excel(param, clazz, filePath, "fromJava");
+    }
+
     //xlsx
-    public static <T> void writeTo2007Excel(List<T> param, String filePath, Class<T> clazz) {
+    public static <T> void writeTo2007Excel(List<T> param, Class<T> clazz, String filePath, String sheetName) throws Exception {
         XSSFWorkbook wb = new XSSFWorkbook();//xlsx文件
         // 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet
-        XSSFSheet sheet = wb.createSheet("fromjava");
+        XSSFSheet sheet = wb.createSheet(sheetName);
         // 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制short
         XSSFRow row0 = sheet.createRow((int) 0);
         // 第四步，创建单元格，并设置值表头 设置表头居中
@@ -454,37 +458,63 @@ public class XLSXCovertCSVReader {
         }
 
         // 第五步，创建单元格，并设置值
-        try {
-            for (int i = 0; i < param.size(); i++) {
-                XSSFRow rowi = sheet.createRow((int) i + 1);
-                T t1 = param.get(i);
-                for (int j = 0; j < fields.length; j++) {
-                    Field field = fields[j];
-                    field.setAccessible(true);
-                    Object object = field.get(t1);
-                    if (object != null) {
-                        rowi.createCell((short) j).setCellValue((String) String.valueOf(object));
-                    }
+        for (int i = 0; i < param.size(); i++) {
+            XSSFRow rowi = sheet.createRow((int) i + 1);
+            T t1 = param.get(i);
+            for (int j = 0; j < fields.length; j++) {
+                Field field = fields[j];
+                field.setAccessible(true);
+                Object object = field.get(t1);
+                if (object != null) {
+                    rowi.createCell((short) j).setCellValue((String) String.valueOf(object));
                 }
             }
-            // 第六步，将文件存到指定位置
-            File file = new File(filePath);
-            if (file.exists()) {
+        }
+        // 第六步，将文件存到指定位置
+        File file = getFile(filePath, "default.xlsx");
+        FileOutputStream fout = new FileOutputStream(file);
+        wb.write(fout);
+        fout.close();
+    }
+
+    //确认该路径存在,如果是目录就拼上文件,如果是文件就保证路径存在
+    private static File getFile(String filePath, String defaultFileName) throws Exception {
+        if (StringUtils.isEmpty(filePath)) {
+            return null;
+        }
+        File file = new File(filePath);
+        if (file.exists()) {//存在
+            if (file.isDirectory()) {//存在是目录
+                String tempFile = filePath + "\\" + defaultFileName;
+                return new File(tempFile);
+            } else {//存在是文件
                 file.delete();
+                return file;
             }
-            FileOutputStream fout = new FileOutputStream(file);
-            wb.write(fout);
-            fout.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {//不存在
+            String lastPart = filePath.substring(filePath.lastIndexOf("\\"));
+            if (lastPart.contains(".")) {//是文件
+                String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+                File dirF = new File(dir);
+                dirF.mkdirs();//创建路径
+                return new File(filePath);
+            } else {
+                file.mkdirs();
+                String tempFile = filePath + "\\" + defaultFileName;
+                return new File(tempFile);
+            }
         }
     }
 
+    public static <T> void writeTo2003Excel(List<T> param, Class<T> clazz, String filePath) throws Exception {
+        writeTo2003Excel(param, clazz, filePath, "fromJava");
+    }
+
     //xls
-    public static <T> void writeTo2003Excel(List<T> param, String filePath, Class<T> clazz) {
+    public static <T> void writeTo2003Excel(List<T> param, Class<T> clazz, String filePath, String sheetName) throws Exception {
         HSSFWorkbook wb = new HSSFWorkbook();//xls文件
         // 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet
-        HSSFSheet sheet = wb.createSheet("fromjava");
+        HSSFSheet sheet = wb.createSheet(sheetName);
         // 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制short
         HSSFRow row0 = sheet.createRow((int) 0);
         // 第四步，创建单元格，并设置值表头 设置表头居中
@@ -503,30 +533,24 @@ public class XLSXCovertCSVReader {
         }
 
         // 第五步，创建单元格，并设置值
-        try {
-            for (int i = 0; i < param.size(); i++) {
-                HSSFRow rowi = sheet.createRow((int) i + 1);
-                T t1 = param.get(i);
-                for (int j = 0; j < fields.length; j++) {
-                    Field field = fields[j];
-                    field.setAccessible(true);
-                    Object object = field.get(t1);
-                    if (object != null) {
-                        rowi.createCell((short) j).setCellValue((String) String.valueOf(object));
-                    }
+        for (int i = 0; i < param.size(); i++) {
+            HSSFRow rowi = sheet.createRow((int) i + 1);
+            T t1 = param.get(i);
+            for (int j = 0; j < fields.length; j++) {
+                Field field = fields[j];
+                field.setAccessible(true);
+                Object object = field.get(t1);
+                if (object != null) {
+                    rowi.createCell((short) j).setCellValue((String) String.valueOf(object));
                 }
             }
-            // 第六步，将文件存到指定位置
-            File file = new File(filePath);
-            if (file.exists()) {
-                file.delete();
-            }
-            FileOutputStream fout = new FileOutputStream(file);
-            wb.write(fout);
-            fout.close();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+        // 第六步，将文件存到指定位置
+        File file = getFile(filePath, "default.xls");
+        FileOutputStream fout = new FileOutputStream(file);
+        wb.write(fout);
+        fout.close();
+
     }
 
     //反射获取所有的属性
@@ -554,7 +578,8 @@ public class XLSXCovertCSVReader {
     }
 
     //从电子表中读出数据到内存
-    public static <T> List<T> read2007Excel(String excelUrl, String excelSheetName, Integer colNum, Class<T> clazz) throws Exception {
+    public static <T> List<T> read2007Excel(String excelUrl, String excelSheetName, Integer colNum, Class<T> clazz) throws
+            Exception {
         List<String[]> list = XLSXCovertCSVReader.readerExcel(excelUrl, excelSheetName, colNum);
         if (CollectionUtils.isEmpty(list)) {
             throw new Exception("未读取到数据");
@@ -588,9 +613,9 @@ public class XLSXCovertCSVReader {
 
         List<StudentDto> excel = XLSXCovertCSVReader.read2007Excel("E:\\test\\demo2\\src\\main\\resources\\excel\\123.xlsx", "Sheet1", 21, StudentDto.class);
         List<StudentDto> list = new ArrayList<>();
-        XLSXCovertCSVReader.writeTo2007Excel(list, "E:\\test\\demo2\\src\\main\\resources\\excel\\1234.xlsx", StudentDto.class);
-        XLSXCovertCSVReader.writeTo2003Excel(list, "E:\\test\\demo2\\src\\main\\resources\\excel\\12345.xls", StudentDto.class);
-        System.out.println(SerializeUtil.toJson(excel));
+        XLSXCovertCSVReader.writeTo2007Excel(list, StudentDto.class, "E:\\test\\demo2\\src\\main\\resources\\excel");
+        XLSXCovertCSVReader.writeTo2003Excel(list, StudentDto.class, "E:\\test\\demo2\\src\\main\\resources\\excel\\12345.xls");
+//        System.out.println(SerializeUtil.toJson(excel));
     }
 
 }

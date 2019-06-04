@@ -168,10 +168,7 @@
             <artifactId>javase</artifactId>
             <version>3.2.0</version>
         </dependency>
-        <dependency>
-            <groupId></groupId>
-            <artifactId>sche</artifactId>
-        </dependency>
+
 
 
     </dependencies>

@@ -7,6 +7,7 @@ import cn.gw.demo2.pojo.page.PageReq;
 import cn.gw.demo2.pojo.page.PageResp;
 import cn.gw.demo2.service.StudentService;
 import cn.gw.demo2.utils.SerializeUtil;
+import cn.gw.demo2.utils.XLSXCovertCSVReader;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -73,6 +74,8 @@ public class StudentServiceImpl implements StudentService {
         PageHelper.startPage(pageRequest.getPageIndex(), pageRequest.getPageSize(), stringBuffer.toString());
         List<StudentDto> studentDtos = studentMapper.listByKeyWord(param);
         PageInfo<StudentDto> info = new PageInfo<>(studentDtos);
+        XLSXCovertCSVReader.writeTo2003Excel(info.getList(), StudentDto.class, "E:\\test\\demo2\\src\\main\\resources\\excel");
+        XLSXCovertCSVReader.writeTo2007Excel(info.getList(), StudentDto.class, "E:\\test\\demo2\\src\\main\\resources\\excel");
         PageResp<StudentDto> resp = new PageResp<>();
         resp.setData(info.getList());
         resp.setElementsSum(info.getTotal());

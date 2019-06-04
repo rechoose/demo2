@@ -14,18 +14,20 @@ package cn.gw.demo2.utils;
    limitations under the License.
 ==================================================================== */
 
-import cn.gw.demo2.pojo.StudentDto;
-import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
-import org.apache.poi.ss.usermodel.BuiltinFormats;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.StylesTable;
-import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.xml.sax.Attributes;
@@ -437,73 +439,19 @@ public class XLSXCovertCSVReader {
 
     //xlsx
     public static <T> void writeTo2007Excel(List<T> param, Class<T> clazz, String filePath, String sheetName) throws Exception {
+        // 第一步, 创建一个工作簿webbook
         XSSFWorkbook wb = new XSSFWorkbook();//xlsx文件
         // 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet
         XSSFSheet sheet = wb.createSheet(sheetName);
-        // 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制short
-        XSSFRow row0 = sheet.createRow((int) 0);
-        // 第四步，创建单元格，并设置值表头 设置表头居中
-        XSSFCellStyle style = wb.createCellStyle();
-        style.setAlignment(HorizontalAlignment.CENTER); // 创建一个居中格式
-
-        XSSFCell cell = null;
-        Field[] fields = getAllFields(clazz);
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
-            field.setAccessible(true);
-            String name = field.getName();
-            cell = row0.createCell((short) i);
-            cell.setCellValue(name);
-            cell.setCellStyle(style);
-        }
-
-        // 第五步，创建单元格，并设置值
-        for (int i = 0; i < param.size(); i++) {
-            XSSFRow rowi = sheet.createRow((int) i + 1);
-            T t1 = param.get(i);
-            for (int j = 0; j < fields.length; j++) {
-                Field field = fields[j];
-                field.setAccessible(true);
-                Object object = field.get(t1);
-                if (object != null) {
-                    rowi.createCell((short) j).setCellValue((String) String.valueOf(object));
-                }
-            }
-        }
-        // 第六步，将文件存到指定位置
-        File file = getFile(filePath, "default.xlsx");
+        // 第三步, 获取表字段
+        Field[] fields = CommonUtils.getAllFields(clazz);
+        // 第四步，将数据存入表中
+        setRows(fields, param, sheet);
+        // 第五步，将文件存到指定位置
+        File file = CommonUtils.getFile(filePath, "default.xlsx");
         FileOutputStream fout = new FileOutputStream(file);
         wb.write(fout);
         fout.close();
-    }
-
-    //确认该路径存在,如果是目录就拼上文件,如果是文件就保证路径存在
-    private static File getFile(String filePath, String defaultFileName) throws Exception {
-        if (StringUtils.isEmpty(filePath)) {
-            return null;
-        }
-        File file = new File(filePath);
-        if (file.exists()) {//存在
-            if (file.isDirectory()) {//存在是目录
-                String tempFile = filePath + "\\" + defaultFileName;
-                return new File(tempFile);
-            } else {//存在是文件
-                file.delete();
-                return file;
-            }
-        } else {//不存在
-            String lastPart = filePath.substring(filePath.lastIndexOf("\\"));
-            if (lastPart.contains(".")) {//是文件
-                String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
-                File dirF = new File(dir);
-                dirF.mkdirs();//创建路径
-                return new File(filePath);
-            } else {
-                file.mkdirs();
-                String tempFile = filePath + "\\" + defaultFileName;
-                return new File(tempFile);
-            }
-        }
     }
 
     public static <T> void writeTo2003Excel(List<T> param, Class<T> clazz, String filePath) throws Exception {
@@ -512,29 +460,32 @@ public class XLSXCovertCSVReader {
 
     //xls
     public static <T> void writeTo2003Excel(List<T> param, Class<T> clazz, String filePath, String sheetName) throws Exception {
+        // 第一步, 创建一个工作簿webbook
         HSSFWorkbook wb = new HSSFWorkbook();//xls文件
-        // 第二步，在webbook中添加一个sheet,对应Excel文件中的sheet
+        // 第二步，在webbook中添加一个工作表sheet,对应Excel文件中的sheet
         HSSFSheet sheet = wb.createSheet(sheetName);
-        // 第三步，在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制short
-        HSSFRow row0 = sheet.createRow((int) 0);
-        // 第四步，创建单元格，并设置值表头 设置表头居中
-        HSSFCellStyle style = wb.createCellStyle();
-        style.setAlignment(HorizontalAlignment.CENTER); // 创建一个居中格式
+        // 第三步, 获取表字段
+        Field[] fields = CommonUtils.getAllFields(clazz);
+        // 第四步，将数据存入表中
+        setRows(fields, param, sheet);
+        // 第五步，将文件存到指定位置
+        File file = CommonUtils.getFile(filePath, "default.xls");
+        FileOutputStream fout = new FileOutputStream(file);
+        wb.write(fout);
+        fout.close();
+    }
 
-        HSSFCell cell = null;
-        Field[] fields = getAllFields(clazz);
+    private static <T> void setRows(Field[] fields, List<T> param, Sheet sheet) throws IllegalAccessException {
+        Row row0 = sheet.createRow((int) 0);
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
             field.setAccessible(true);
             String name = field.getName();
-            cell = row0.createCell((short) i);
+            Cell cell = row0.createCell((short) i);
             cell.setCellValue(name);
-            cell.setCellStyle(style);
         }
-
-        // 第五步，创建单元格，并设置值
         for (int i = 0; i < param.size(); i++) {
-            HSSFRow rowi = sheet.createRow((int) i + 1);
+            Row rowi = sheet.createRow((int) i + 1);
             T t1 = param.get(i);
             for (int j = 0; j < fields.length; j++) {
                 Field field = fields[j];
@@ -545,36 +496,6 @@ public class XLSXCovertCSVReader {
                 }
             }
         }
-        // 第六步，将文件存到指定位置
-        File file = getFile(filePath, "default.xls");
-        FileOutputStream fout = new FileOutputStream(file);
-        wb.write(fout);
-        fout.close();
-
-    }
-
-    //反射获取所有的属性
-    private static Field[] getAllFields(Object object) {
-        Class clazz = object.getClass();
-        List<Field> fieldList = new ArrayList<>();
-        while (clazz != null) {
-            fieldList.addAll(new ArrayList<>(Arrays.asList(clazz.getDeclaredFields())));
-            clazz = clazz.getSuperclass();
-        }
-        Field[] fields = new Field[fieldList.size()];
-        fieldList.toArray(fields);
-        return fields;
-    }
-
-    private static Field[] getAllFields(Class clazz) {
-        List<Field> fieldList = new ArrayList<>();
-        while (clazz != null) {
-            fieldList.addAll(new ArrayList<>(Arrays.asList(clazz.getDeclaredFields())));
-            clazz = clazz.getSuperclass();
-        }
-        Field[] fields = new Field[fieldList.size()];
-        fieldList.toArray(fields);
-        return fields;
     }
 
     //从电子表中读出数据到内存
@@ -611,11 +532,20 @@ public class XLSXCovertCSVReader {
 
     public static void main(String[] args) throws Exception {
 
-        List<StudentDto> excel = XLSXCovertCSVReader.read2007Excel("E:\\test\\demo2\\src\\main\\resources\\excel\\123.xlsx", "Sheet1", 21, StudentDto.class);
-        List<StudentDto> list = new ArrayList<>();
-        XLSXCovertCSVReader.writeTo2007Excel(list, StudentDto.class, "E:\\test\\demo2\\src\\main\\resources\\excel");
-        XLSXCovertCSVReader.writeTo2003Excel(list, StudentDto.class, "E:\\test\\demo2\\src\\main\\resources\\excel\\12345.xls");
+//        List<StudentDto> excel = XLSXCovertCSVReader.read2007Excel("E:\\test\\demo2\\src\\main\\resources\\excel\\123.xlsx", "Sheet1", 21, StudentDto.class);
+//        List<StudentDto> list = new ArrayList<>();
+//        XLSXCovertCSVReader.writeTo2007Excel(list, StudentDto.class, "E:\\test\\demo2\\src\\main\\resources\\excel");
+//        XLSXCovertCSVReader.writeTo2003Excel(list, StudentDto.class, "E:\\test\\demo2\\src\\main\\resources\\excel\\12345.xls");
 //        System.out.println(SerializeUtil.toJson(excel));
+
+        try {
+            int i = 1 / 0;
+            throw new RuntimeException();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println(1);
+        }
+
     }
 
 }

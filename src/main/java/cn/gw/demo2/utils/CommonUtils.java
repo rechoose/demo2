@@ -2,7 +2,12 @@ package cn.gw.demo2.utils;
 
 import org.springframework.util.StringUtils;
 
+import java.io.File;
+import java.lang.reflect.Field;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class CommonUtils {
 
@@ -76,5 +81,83 @@ public class CommonUtils {
 
         return hexVal.toString();
 
+    }
+
+    /**
+     *
+     * @param filePath 例如: f:\test.jpg  或  f:\test  均可
+     * @param defaultFileName 例如: test.jpg
+     * @return
+     * @throws Exception
+     */
+    //确认该路径存在,如果是目录就拼上文件,如果是文件就保证路径存在
+    public static File getFile(String filePath, String defaultFileName) throws Exception {
+        if (StringUtils.isEmpty(filePath)) {
+            return null;
+        }
+        File file = new File(filePath);
+        if (file.exists()) {//存在
+            if (file.isDirectory()) {//存在是目录
+                String tempFile = filePath + "\\" + defaultFileName;
+                return new File(tempFile);
+            } else {//存在是文件
+                file.delete();
+                return file;
+            }
+        } else {//不存在
+            String lastPart = filePath.substring(filePath.lastIndexOf("\\"));
+            if (lastPart.contains(".")) {//是文件
+                String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+                File dirF = new File(dir);
+                dirF.mkdirs();//创建路径
+                return new File(filePath);
+            } else {
+                file.mkdirs();
+                String tempFile = filePath + "\\" + defaultFileName;
+                return new File(tempFile);
+            }
+        }
+    }
+
+    //确认该路径存在
+    public static String getPath(String filePath) throws Exception {
+        if (StringUtils.isEmpty(filePath)) {
+            return filePath;
+        }
+        File file = new File(filePath);
+        if (file.exists()) {//存在
+            if (file.isDirectory()) {//存在是目录
+                return filePath;
+            } else {//存在是文件
+                return filePath.substring(0, filePath.lastIndexOf("\\"));
+            }
+        } else {//不存在
+            String lastPart = filePath.substring(filePath.lastIndexOf("\\"));
+            if (lastPart.contains(".")) {//是文件
+                String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+                File dirF = new File(dir);
+                dirF.mkdirs();//创建路径
+                return dir;
+            } else {
+                file.mkdirs();
+                return filePath;
+            }
+        }
+    }
+
+    //反射获取所有的属性
+    public static Field[] getAllFields(Object object) {
+        return getAllFields(object.getClass());
+    }
+
+    public static Field[] getAllFields(Class clazz) {
+        List<Field> fieldList = new ArrayList<>();
+        while (clazz != null) {
+            fieldList.addAll(new ArrayList<>(Arrays.asList(clazz.getDeclaredFields())));
+            clazz = clazz.getSuperclass();
+        }
+        Field[] fields = new Field[fieldList.size()];
+        fieldList.toArray(fields);
+        return fields;
     }
 }

@@ -88,7 +88,7 @@ public class QrcodeUtil {
 
     public static void main(String[] args) throws Exception {
         QrcodeUtil.createQrcodeToFile("http://weixin.qq.com/r/dkgOFovEh9b4rc919x1k", "f:\\test\\4.png");
-        QrcodeUtil.readQrCode(new FileInputStream("F:\\test\\20180702205710545.jfif"));
-        QrcodeUtil.readQrCode(new FileInputStream("f:\\test\\3.png"));
+        QrcodeUtil.readQrCode(new FileInputStream("f:\\test\\qq2.png"));
+        QrcodeUtil.readQrCode(new FileInputStream("f:\\test\\qq.png"));
     }
 }

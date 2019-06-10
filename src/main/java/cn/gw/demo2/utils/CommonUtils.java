@@ -84,8 +84,7 @@ public class CommonUtils {
     }
 
     /**
-     *
-     * @param filePath 例如: f:\test.jpg  或  f:\test  均可
+     * @param filePath        例如: f:\test.jpg  或  f:\test  均可
      * @param defaultFileName 例如: test.jpg
      * @return
      * @throws Exception
@@ -98,22 +97,21 @@ public class CommonUtils {
         File file = new File(filePath);
         if (file.exists()) {//存在
             if (file.isDirectory()) {//存在是目录
-                String tempFile = filePath + "\\" + defaultFileName;
+                String tempFile = filePath + File.separator + defaultFileName;
                 return new File(tempFile);
             } else {//存在是文件
-                file.delete();
                 return file;
             }
         } else {//不存在
-            String lastPart = filePath.substring(filePath.lastIndexOf("\\"));
-            if (lastPart.contains(".")) {//是文件
-                String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+            String lastPart = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+            if (lastPart.contains(".")) {//是文件??待完善,临时处理
+                String dir = filePath.substring(0, filePath.lastIndexOf(File.separator));
                 File dirF = new File(dir);
                 dirF.mkdirs();//创建路径
                 return new File(filePath);
-            } else {
+            } else {//是目录
                 file.mkdirs();
-                String tempFile = filePath + "\\" + defaultFileName;
+                String tempFile = filePath + File.separator + defaultFileName;
                 return new File(tempFile);
             }
         }
@@ -129,12 +127,12 @@ public class CommonUtils {
             if (file.isDirectory()) {//存在是目录
                 return filePath;
             } else {//存在是文件
-                return filePath.substring(0, filePath.lastIndexOf("\\"));
+                return filePath.substring(0, filePath.lastIndexOf(File.separator));
             }
         } else {//不存在
-            String lastPart = filePath.substring(filePath.lastIndexOf("\\"));
+            String lastPart = filePath.substring(filePath.lastIndexOf(File.separator));
             if (lastPart.contains(".")) {//是文件
-                String dir = filePath.substring(0, filePath.lastIndexOf("\\"));
+                String dir = filePath.substring(0, filePath.lastIndexOf(File.separator));
                 File dirF = new File(dir);
                 dirF.mkdirs();//创建路径
                 return dir;

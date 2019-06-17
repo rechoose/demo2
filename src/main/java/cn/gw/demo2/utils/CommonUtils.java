@@ -1,5 +1,6 @@
 package cn.gw.demo2.utils;
 
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
@@ -157,5 +158,25 @@ public class CommonUtils {
         Field[] fields = new Field[fieldList.size()];
         fieldList.toArray(fields);
         return fields;
+    }
+
+    //超过1000的list转为多个小于1000的list
+    public static List<List<String>> split1000(List<String> listMoreThen1000) {
+        List<List<String>> multiListEachLessThen1000 = new ArrayList<>();
+        if (CollectionUtils.isEmpty(listMoreThen1000)) {
+            return multiListEachLessThen1000;
+        }
+        int allCount = listMoreThen1000.size();
+        int num = allCount / 999;
+        for (int i = 0; i <= num; i++) {
+            List<String> strings = new ArrayList<>();
+            if (i >= num) {
+                strings = listMoreThen1000.subList(i * 999, allCount);
+            } else {
+                strings = listMoreThen1000.subList(i * 999, (i + 1) * 999);//  0~998
+            }
+            multiListEachLessThen1000.add(strings);
+        }
+        return multiListEachLessThen1000;
     }
 }

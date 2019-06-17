@@ -6,6 +6,7 @@ import cn.gw.demo2.pojo.page.Ordering;
 import cn.gw.demo2.pojo.page.PageReq;
 import cn.gw.demo2.pojo.page.PageResp;
 import cn.gw.demo2.service.StudentService;
+import cn.gw.demo2.utils.CommonUtils;
 import cn.gw.demo2.utils.SerializeUtil;
 import cn.gw.demo2.utils.XLSXCovertCSVReader;
 import com.github.pagehelper.PageHelper;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,17 @@ public class StudentServiceImpl implements StudentService {
         ValueOperations ops = redisTemplate.opsForValue();
         ops.set("test", SerializeUtil.toJson(one), 10000, TimeUnit.MILLISECONDS);
         return one;
+    }
+
+    @Override
+    public List<StudentDto> findByIds(List<String> ids) throws Exception {
+        List<StudentDto> result = new ArrayList<>();
+        List<List<String>> lists = CommonUtils.split1000(ids);
+        for (List<String> list : lists) {
+            List<StudentDto> temp = studentMapper.findByIds(list);
+            result.addAll(temp);
+        }
+        return result;
     }
 
     @Override

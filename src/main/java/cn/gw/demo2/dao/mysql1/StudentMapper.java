@@ -15,4 +15,6 @@ public interface StudentMapper {
     List<StudentDto> listByKeyWord(Map<String, Object> param) throws Exception;
 
     List<StudentDto> listByIds(Map<String, Object> param) throws Exception;
+
+    List<StudentDto> findByIds(@Param("ids") List<String> ids);
 }

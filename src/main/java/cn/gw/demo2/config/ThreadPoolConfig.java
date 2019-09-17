@@ -1,6 +1,7 @@
 package cn.gw.demo2.config;
 
 import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -11,7 +12,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  */
 @Data
 @Configuration
-public class AsyncThreadPoolConfig {
+@ConfigurationProperties("thread.async")
+public class ThreadPoolConfig {
     private Integer corePoolSize = 30;//线程池维护线程的最少数量
 
     private Integer maxPoolSize = 50;//线程池维护线程的最大数量

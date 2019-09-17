@@ -4,6 +4,7 @@ import cn.gw.demo2.io.MessageIO;
 import cn.gw.demo2.pojo.StudentDto;
 import cn.gw.demo2.pojo.page.PageReq;
 import cn.gw.demo2.service.StudentService;
+import cn.gw.demo2.utils.CommonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +41,19 @@ public class StudentController {
     @GetMapping("/send")
     @ApiOperation("获取每日车流量信息")
     public void sendMsg() {
+        Random random = new Random();
         for (int i = 0; i < 10000; i++) {
             StudentDto studentDto = new StudentDto();
             studentDto.setId(UUID.randomUUID().toString());
-            studentDto.setName("jack");
-            studentDto.setSex(new Random().nextInt(30));
+            if (i % 2 == 0) {
+                studentDto.setName(CommonUtils.getStringRandom(3 + new Random().nextInt(7)));
+            } else {
+                studentDto.setName(CommonUtils.randomGBKJianHan(2 + new Random().nextInt(2)));
+            }
+         /*   String names = "编码字符串字节数组解码：字节数组->字符串。出现乱码就是编码使用的格式与解码使用的格式不一样导致码表中无法读取正确的字符（我们会使用的基本也就是GBK和UTF-8，乱码也就是没有控制两者的统一）";
+            int i1 = random.nextInt(names.length() - 4);
+            studentDto.setName(names.substring(i1, i1 + random.nextInt(4)));*/
+            studentDto.setSex(new Random().nextInt(80));
             Message<StudentDto> ss = MessageBuilder.withPayload(studentDto).build();
             messageIO.output().send(ss);
         }

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.gw.demo2.dao.mysql1.PointResourceDao">
+
+	<select id="queryPageData" parameterType="cn.gw.demo2.pojo.TemplateQueryParam" resultType="java.util.LinkedHashMap">
+		<if test="pageSize > 0">
+			SELECT * FROM
+			(
+			SELECT t.*,ROWNUM as RN FROM
+			(
+		</if>
+				select
+				<foreach collection="columns" index="index" item="column" open=" " separator="," close="  ">
+					${column}
+				</foreach>
+				from ${tableName}
+				<choose>
+					<when test="conditions != null and conditions.size() &gt; 0 ">
+						<where>
+							<foreach item="condition"  collection="conditions"  open=" " separator=" and " close=" ">
+								${condition.field} ${condition.symbol}
+								<if test="condition.symbol == 'IN' or condition.symbol == 'in'">
+									${condition.value}
+								</if>
+								<if test="condition.symbol != 'IN' and condition.symbol != 'in'">
+									#{condition.value}
+								</if>
+							</foreach>
+						</where>
+					</when>
+				</choose>
+				<choose>
+					<when test="sorters != null and sorters.size() &gt; 0 ">
+						<foreach collection="sorters" item="sorter" open="order by " separator="," close="  ">
+							${sorter.sortField} ${sorter.order}
+						</foreach>
+					</when>
+				</choose>
+		<if test="pageSize > 0">
+			) t
+		)
+		WHERE RN BETWEEN #{pageIndex} AND #{pageSize}
+		</if>
+	</select>
+
+    <select id="queryPageDataCompatibility" parameterType="cn.gw.demo2.pojo.TemplateQueryParam"
+            resultType="java.util.LinkedHashMap">
+        <if test="pageSize > 0">
+            SELECT * FROM
+            (
+            SELECT t.*,ROWNUM as RN FROM
+            (
+        </if>
+        select
+        <foreach collection="columns" index="index" item="column" open=" " separator="," close="  ">
+            ${column}
+        </foreach>
+        from ${tableName}
+        <choose>
+            <when test="conditions != null and conditions.size() &gt; 0 ">
+                <where>
+                    <foreach item="condition" collection="conditions" open=" " separator=" and " close=" ">
+                        ${condition.field} ${condition.symbol} ${condition.value}
+                    </foreach>
+                </where>
+            </when>
+        </choose>
+        <choose>
+            <when test="sorters != null and sorters.size() &gt; 0 ">
+                <foreach collection="sorters" item="sorter" open="order by " separator="," close="  ">
+                    ${sorter.sortField} ${sorter.order}
+                </foreach>
+            </when>
+        </choose>
+        <if test="pageSize > 0">
+            ) t
+            )
+            WHERE RN BETWEEN #{pageIndex} AND #{pageSize}
+        </if>
+    </select>
+
+
+	<select id="count" parameterType="cn.gw.demo2.pojo.TemplateQueryParam" resultType="int">
+		select count(*) from ${tableName}
+		<choose>
+			<when test="conditions != null and conditions.size() &gt; 0 ">
+				<where>
+					<foreach item="condition" collection="conditions" open=" " separator=" and " close=" ">
+						${condition.field} ${condition.symbol}
+						<if test="condition.symbol == 'IN' or condition.symbol == 'in'">
+							${condition.value}
+						</if>
+						<if test="condition.symbol != 'IN' and condition.symbol != 'in'">
+							#{condition.value}
+						</if>
+					</foreach>
+				</where>
+			</when>
+		</choose>
+	</select>
+
+    <select id="countCompatibility" parameterType="cn.gw.demo2.pojo.TemplateQueryParam" resultType="int">
+        select count(*) from ${tableName}
+        <choose>
+            <when test="conditions != null and conditions.size() &gt; 0 ">
+                <where>
+                    <foreach item="condition" collection="conditions" open=" " separator=" and " close=" ">
+                        ${condition.field} ${condition.symbol} ${condition.value}
+                    </foreach>
+                </where>
+            </when>
+        </choose>
+    </select>
+
+
+	<update id="updateData" parameterType="cn.gw.demo2.pojo.TemplateUpdateParam">
+		update ${tableName}
+		<set>
+			<foreach item="value" index="key" collection="data.entrySet()" separator="," >
+				${key} = #{value}
+			</foreach>
+		</set>
+		<where>
+			<foreach item="condition"  collection="conditions"  open=" " separator=" and " close=" ">
+				${condition.field} ${condition.symbol} #{condition.value}
+			</foreach>
+		</where>
+	</update>
+
+
+	<update id="deleteData" parameterType="cn.gw.demo2.pojo.TemplateDeleteParam">
+		delete from ${tableName}
+		<where>
+			<foreach item="condition"  collection="conditions"  open=" " separator=" and " close=" ">
+				${condition.field} ${condition.symbol} #{condition.value}
+			</foreach>
+		</where>
+	</update>
+
+
+	<insert id="addData" parameterType="cn.gw.demo2.pojo.TemplateAddParam">
+		insert  into ${tableName}
+		<foreach collection="columns" index="index" item="column" open=" (" separator="," close=") ">
+			${column}
+		</foreach>
+		values
+		<foreach collection="datas" index="" item="data" open=" (" separator="," close=") ">
+			#{data}
+		</foreach>
+	</insert>
+
+	<insert id="addBatchData" parameterType="cn.gw.demo2.pojo.TemplateAddBatchParam" useGeneratedKeys="false">
+		insert  into ${tableName}
+		<foreach collection="columns" index="index" item="column" open=" (" separator="," close=") ">
+			${column}
+		</foreach>
+		select cd.* from(
+		<foreach collection="datasList" item="datas" index="index"  close=")" open="(" separator="union">
+			<foreach collection="datas" index="" item="data" open=" select " separator="," close=" from dual ">
+				#{data}
+			</foreach>
+		</foreach>
+		) cd
+	</insert>
+</mapper>

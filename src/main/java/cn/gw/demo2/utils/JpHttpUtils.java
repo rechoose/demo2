@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
@@ -175,4 +176,52 @@ public class JpHttpUtils {
         }
         return response;
     }
+
+    /**
+     * @throws MalformedURLException,IOException
+     * @Title: creatPostAndTransData
+     * @Description: TODO
+     * @param: @param dataMap,内含ip,disPhone,email
+     * @param: @return   String 类型,string是请求接口返回的报文信息拼接的字符串
+     * @return: String
+     */
+    public static String sendPostWithXml(String urlStr, String xml) {
+        String line = "";
+        StringBuffer resultSting = new StringBuffer();
+        OutputStreamWriter out = null;
+        try {
+            URL url = new URL(urlStr);
+            //1.创建链接
+            URLConnection con = url.openConnection();
+            //2.封装报文传输进行传输
+            byte[] xmlData = xml.getBytes();
+            con.setDoOutput(true);
+            con.setDoInput(true);
+            con.setUseCaches(false);
+//            con.setRequestProperty("Pragma:", "no-cache");
+            con.setRequestProperty("Cache-Control", "no-cache");
+            con.setRequestProperty("Content-Type", "text/xml");
+            con.setRequestProperty("Content-length", String.valueOf(xmlData.length));
+            out = new OutputStreamWriter(con.getOutputStream());
+            out.write(new String(xmlData, "utf-8"));
+            out.flush();
+            //3.获取返回报文
+            BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            //对返回值报文进行打印
+            for (line = br.readLine(); line != null; line = br.readLine()) {
+                resultSting.append(line);
+            }
+            return resultSting.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return resultSting.toString();
+    }
+
 }

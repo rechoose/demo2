@@ -5,11 +5,40 @@ spring:
     name: my_first
     #多数据源配置
   datasource:
+#    bio:
+#      driver-class-name: oracle.jdbc.driver.OracleDriver
+#      url: ${oracle.url}
+#      username: HCZZInstruction1
+#      password: password
+#    YiErSanSiWu:
+#      driver-class-name: oracle.jdbc.driver.OracleDriver
+#      url: ${oracle.url}
+#      username: HCZZPPolSituInfo
+#      password: password
     mysql1:
       driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://192.168.132.101:3306/gongwei
+      url: jdbc:mysql://192.168.132.101:3306/gw_test1
       username: root
       password: root
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      # 检查可以关闭的空闲链接的间隔时间
+      time-between-eviction-runs-millis: 60000
+      # 连接在池中最小生存时间
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+#  jpa:
+#    show-sql: true
+#    properties:
+#        javax.persistence.validation.mode: none
+
+
   swagger:
     base-package: cn.gw.demo2.controller
     api-info:
@@ -74,5 +103,5 @@ spring:
 #      defaultZone: http://localhost:8761/eureka/
 
 
-
-
+#logging:
+#  level: cn.gw: debug

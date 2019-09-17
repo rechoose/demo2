@@ -1,14 +1,18 @@
 package cn.gw.demo2.utils;
 
+import com.google.common.collect.Lists;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class CommonUtils {
 
@@ -152,7 +156,7 @@ public class CommonUtils {
     public static Field[] getAllFields(Class clazz) {
         List<Field> fieldList = new ArrayList<>();
         while (clazz != null) {
-            fieldList.addAll(new ArrayList<>(Arrays.asList(clazz.getDeclaredFields())));
+            fieldList.addAll(Lists.newArrayList(clazz.getDeclaredFields()));
             clazz = clazz.getSuperclass();
         }
         Field[] fields = new Field[fieldList.size()];
@@ -179,4 +183,76 @@ public class CommonUtils {
         }
         return multiListEachLessThen1000;
     }
+
+      //自动生成名字（中文）
+    public static String randomGBKJianHan(int len) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < len; i++) {
+            int hightPos, lowPos; // 定义高低位
+            Random random = new Random();
+            hightPos = (176 + Math.abs(random.nextInt(39)));//获取高位值
+            lowPos = (161 + Math.abs(random.nextInt(93)));//获取低位值
+            byte[] b = new byte[2];
+            b[0] = (new Integer(hightPos).byteValue());
+            b[1] = (new Integer(lowPos).byteValue());
+            try {
+                sb.append(new String(b, "GBk"));//转成中文
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+        String s ="";
+        try {
+             s = new String(getUTF8BytesFromGBKString(sb.toString()), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return s;
+    }
+
+    //生成随机用户名，数字和字母组成,
+    public static String getStringRandom(int length) {
+        String val = "";
+        Random random = new Random();
+
+        //参数length，表示生成几位随机数
+        for(int i = 0; i < length; i++) {
+
+            String charOrNum = random.nextInt(2) % 2 == 0 ? "char" : "num";
+            //输出字母还是数字
+            if( "char".equalsIgnoreCase(charOrNum) ) {
+                //输出是大写字母还是小写字母
+                int temp = random.nextInt(2) % 2 == 0 ? 65 : 97;
+                val += (char)(random.nextInt(26) + temp);
+            } else if( "num".equalsIgnoreCase(charOrNum) ) {
+                val += String.valueOf(random.nextInt(10));
+            }
+        }
+        return val;
+    }
+
+    //gbk转为utf8
+    public static byte[] getUTF8BytesFromGBKString(String gbkStr) {
+        int n = gbkStr.length();
+        byte[] utfBytes = new byte[3 * n];
+        int k = 0;
+        for (int i = 0; i < n; i++) {
+            int m = gbkStr.charAt(i);
+            if (m < 128 && m >= 0) {
+                utfBytes[k++] = (byte) m;
+                continue;
+            }
+            utfBytes[k++] = (byte) (0xe0 | (m >> 12));
+            utfBytes[k++] = (byte) (0x80 | ((m >> 6) & 0x3f));
+            utfBytes[k++] = (byte) (0x80 | (m & 0x3f));
+        }
+        if (k < utfBytes.length) {
+            byte[] tmp = new byte[k];
+            System.arraycopy(utfBytes, 0, tmp, 0, k);
+            return tmp;
+        }
+        return utfBytes;
+    }
+
+
 }

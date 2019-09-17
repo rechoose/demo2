@@ -77,9 +77,7 @@ public class StudentServiceImpl implements StudentService {
         StringBuffer stringBuffer = new StringBuffer();
         if (!CollectionUtils.isEmpty(sort)) {
             for (Ordering ordering : sort) {
-                String field = ordering.getField();
-                String direction = ordering.getDirection();
-                stringBuffer.append(field).append(" ").append(direction).append(",");
+                stringBuffer.append(ordering.getField()).append(" ").append(ordering.getDirection()).append(",");
             }
             int i = stringBuffer.lastIndexOf(",");
             stringBuffer.deleteCharAt(i);

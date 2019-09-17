@@ -14,6 +14,8 @@ package cn.gw.demo2.utils;
    limitations under the License.
 ==================================================================== */
 
+import cn.gw.demo2.pojo.Mz;
+import com.google.common.base.Splitter;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -537,15 +539,26 @@ public class XLSXCovertCSVReader {
 //        XLSXCovertCSVReader.writeTo2007Excel(list, StudentDto.class, "E:\\test\\demo2\\src\\main\\resources\\excel");
 //        XLSXCovertCSVReader.writeTo2003Excel(list, StudentDto.class, "E:\\test\\demo2\\src\\main\\resources\\excel\\12345.xls");
 //        System.out.println(SerializeUtil.toJson(excel));
-
-        try {
-            int i = 1 / 0;
-            throw new RuntimeException();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println(1);
+        String kk = "01汉族   02蒙古族  03回族  04藏族  05维吾尔族  06苗族  07彝族  08壮族  09布依族  10朝鲜族 " +
+                " 11满族  12侗族  13瑶族  14白族  15土家族  16哈尼族  17哈萨克族  18傣族  19黎族  20傈僳族  21佤族 " +
+                " 22畲族  23高山族  24拉祜族  25水族  26东乡族  27纳西族  28景颇族  29柯尔克孜族  30土族  31达斡尔族  32仫佬族  " +
+                "33羌族   34布朗族  35撒拉族  36毛难族  37仡佬族  38锡伯族  39阿昌族  40普米族  41塔吉克族  42怒族  43乌孜别克族  44俄罗斯族  " +
+                "45鄂温克族  46崩龙族  47保安族  48裕固族  49京族  50塔塔尔族  51独龙族  52鄂伦春族  53赫哲族  54门巴族  55珞巴族  56基诺族  " +
+                "97其他  98外国血统";
+        Iterable<String> split = Splitter.on("  ").omitEmptyStrings().split(kk);
+        Iterator<String> it = split.iterator();
+        ArrayList<Mz> mzs = new ArrayList<>();
+        while (it.hasNext()) {
+            String next = it.next().trim();
+            String id = next.substring(0, 2).trim();
+            String name = next.substring(2).trim();
+            Mz mz = new Mz();
+            mz.setId(id);
+            mz.setName(name);
+            mzs.add(mz);
         }
-
+        XLSXCovertCSVReader.writeTo2007Excel(mzs,Mz.class,"C:\\Users\\Administrator\\Desktop\\mz.xlsx","11");
+        System.out.println("");
     }
 
 }
